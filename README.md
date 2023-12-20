@@ -1,0 +1,1 @@
+some simple project in ursina cuz im bored af
