@@ -1,64 +1,84 @@
 from ursina import *
+from random import uniform
 from ursina.prefabs.first_person_controller import FirstPersonController
+
+def input(key):
+    if key == "left mouse down":
+        Audio("assets/Ursina-Engine_FPS_assets_laser_sound.wav")
+        Animation("assets/textures/fireAnimation/spark_01.png", parent = camera.ui, scale = 0.1, position=(0.39, -0.3), loop= False)
+
+class Wasp(Button):
+    def __init__(self, x, y, z):
+        super().__init__(
+            parent = scene,
+            position = (x, y, z),
+            model = "assets/models/wasp.obj",
+            color = color.white,
+            collider = "box",
+            scale = 0.1,
+            colider = "box"
+        
+        )
 
 app = Ursina()
 
-selected_block = "dirt"
-
-textures = {
-    "grass": load_texture("assets/textures/grass.png"),
-    "dirt": load_texture("assets/textures/dirt.png"),
-    "stone": load_texture("assets/textures\stone.png"),
-}
-
-class Block(Entity):
-    def __init__(self, position, block_type):
-        super().__init__(
-            position = position,
-            model = "cube",
-            scale=1,
-            origin_y = 0.5,
-            texture = textures.get(block_type),
-            collider = "box"
-        ) 
-        self.block_type = block_type
-
-mini_block = Entity(
-    parent = camera,
-    model = "cube",
-    texture = textures.get(selected_block),
-    scale = 0.2,
-    position = (0.35, -0.25, 0.5)
-)
-
+Sky()
 
 player = FirstPersonController(
     mouse_sensitivity=Vec2(50, 50),
-    position = (0, 5, 0)
+    position = (0, 0, 0),
+    origin_y = -0.5
 )
 
-for x in range(-10, 10):
-  for z in range(-10, 10):
-      block = Block((x, 0, z), "grass")
-        
-    
-def input(key):
-    global selected_block
-    #place
-    if key == "left mouse down":
-        hit_info = raycast(camera.world_position, camera.forward, distance=10)
-        if hit_info.hit:
-            block = Block(hit_info.entity.position + hit_info.normal, selected_block)
-    #destroy
-    if key == "right mouse down":
-        destroy(mouse.hovered_entity)    
-    #change block
-    if key == '1':
-        selected_block = "grass"
-    if key =='2':
-        selected_block = "dirt"
-        
-def update():
-    mini_block.texture=textures.get(selected_block)
-          
+ground = Entity(
+    model = "plane",
+    scale = (100, 1, 100),
+    texture="assets/textures/grass.png",
+    collider= "box",
+    texture_scale = (1, 1)
+)
+
+wall_1 = Entity(
+    model="cube", 
+    collider="box", 
+    position=(-8, 0, 0), 
+    scale=(8,5,1),
+    texture = "brick",
+    colider = "box",
+    color = color.brown,
+    texture_scale = (5, 5)
+    )
+
+wall_2 = duplicate(wall_1, z=5)
+
+wall_3 = duplicate(wall_1, z=10)
+
+wall_4 = Entity(
+    model="cube", 
+    collider="box", 
+    position=(-15, 0, 10), 
+    scale=(1,5,20),
+    rotation = (0, 0, 0),
+    texture = "brick",
+    colider = "box",
+    color = color.brown,
+    texture_scale = (5, 5)
+    )
+
+gun = Entity(
+    model = "assets/models/gun.obj",
+    parent = camera.ui,
+    scale = 0.1,
+    position = (0.4,-0.39),
+    rotation=(-5, -10, -10),
+    color = color.blue
+)
+
+num = 6
+wasps = [None] * num
+for i in range(num):
+    wasps[i] = Wasp(uniform(-10, 10), uniform(1, 10), uniform(-10, 10))
+
+
+
 app.run()
